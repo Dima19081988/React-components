@@ -36,11 +36,11 @@ function getMonthMatrix(date) {
     const daysInPrevMonth = prevMonthLastDay.date();
 
     const matrix = [];
-    let day = firstWeekDay - 1;
+    let day = 1 - firstWeekDay;
 
     for (let week = 0; week < 6; week++) {
         const weekArr = [];
-        for (let weekday = 0; weekday < 7; weekday++) {
+        for (let weekday = 0; weekday < 7; weekday++, day++) {
             let cellDate;
             let isOtherMonth = false;
 //для дней предыдущего и следующего месяца
@@ -49,6 +49,7 @@ function getMonthMatrix(date) {
                 isOtherMonth = true;
             } else if (day > daysInMonth) {
                 cellDate = moment([year, month + 1]).date(day - daysInMonth);
+                isOtherMonth = true;
             } else {
 //текущий месяц
                 cellDate = moment([year, month]).date(day)              
@@ -78,7 +79,62 @@ function Calendar ({ date }) {
     const matrix = getMonthMatrix(date);
 
     return (
-        
-    )
+        <div className="ui-datepicker">
+            <div className="ui-datepicker-material-header">
+                <div className="ui-datepicker-material-day">{materialDay}</div>
+                <div className="ui-datepicker-material-date">
+                    <div className="ui-datepicker-material-day-num">{dayNum}</div>
+                    <div className="ui-datepicker-material-month">
+                    {materialMonth.charAt(0).toUpperCase() + materialMonth.slice(1)}
+                    </div>
+                    <div className="ui-datepicker-material-year">{year}</div>
+                </div>
+            </div>
+            <div className="ui-datepicker-header">
+                <div className="ui-datepicker-title">
+                    <span className="ui-datepicker-month">{headerMonth}</span>
+                    <span className="ui-datepicker-year">{year}</span>
+                </div>
+                <table className="ui-datepicker-calendar">
+                    <colgroup>
+                        <col /><col /><col /><col /><col />
+                        <col className="ui-datepicker-week-end" />
+                        <col className="ui-datepicker-week-end" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            {WEEKDAYS.map((wd, i) => (
+                                <th key={wd} scope="col" title={WEEKDAYS_FULL[(i + 1) % 7]}>{wd}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {matrix.map((week, i) => (
+                          <tr key={i}>
+                            {week.map(({ date: cellDate, isOtherMonth }, j) => {
+                                let className = "";
+                                if (isOtherMonth) className = 'ui-datepicker-other-month'
+                                if (
+                                    !isOtherMonth &&
+                                    cellDate.date() === dayNum &&
+                                    cellDate.month() === month &&
+                                    cellDate.year() === year
+                                ) {
+                                    className = 'ui-datepicker-today';
+                                }
 
+                                return (
+                                    <td key={j} className={className}>{cellDate.date()}
+                                    </td>
+                                )
+                            })}
+                          </tr>  
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
 }
+
+export default Calendar;
